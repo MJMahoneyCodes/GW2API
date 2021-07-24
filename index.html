@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guild Wars 2 API</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script>
+        "use strict";
+
+        $(document).ready( () => {
+            //disables the name and requirement buttons
+            //because you need to first click the achievement button to get the achievement ID
+            //
+            //I tried to do these all from one button click, but I couldn't pass the ID from the 
+            //first button click to the second/third ajax calls
+            $("#retrieveName").attr("disabled", true);
+            $("#retrieveRequirement").attr("disabled", true);
+            //makes the call to the API to retrieve the first achievement's ID
+            $("#retrieveID").click( () => {
+                var url = "https://api.guildwars2.com/v2/achievements/daily"
+                $.ajax({
+                    method: "GET",
+                    url: url,
+                    dataType: "json"
+                    }).done(function (GW2APIResponse) {
+                        //displays the first ID on the page
+                        $("#firstID").text(GW2APIResponse.pve[0].id);
+                });
+                //enables the buttons so that they can be used for the next steps
+                $("#retrieveName").attr("disabled", false);
+                $("#retrieveRequirement").attr("disabled", false);
+            });
+            
+            //retrieves the achievement's name
+            //uses the ID returned from the retrieve achievement button click
+            $("#retrieveName").click( () => {
+                var firstIDUrl = "https://api.guildwars2.com/v2/achievements?ids=" + $("#firstID").text();
+                $.ajax({
+                    method: "GET",
+                    url: firstIDUrl,
+                    dataType: "json"
+                    }).done(function (firstIDResponse) {
+                        $("#firstName").text(firstIDResponse[0].name); 
+                }) 
+            });
+
+            //retrieves the achievement's requirements
+            //uses the ID returned from the retrieve achievement button click
+            $("#retrieveRequirement").click( () => {
+                var firstIDUrl = "https://api.guildwars2.com/v2/achievements?ids=" + $("#firstID").text();
+                $.ajax({
+                    method: "GET",
+                    url: firstIDUrl,
+                    dataType: "json"
+                    }).done(function (firstIDResponse) {
+                        $("#firstRequirement").text(firstIDResponse[0].requirement); 
+                }) 
+            });
+        });
+    </script>
+</head>
+<body>
+    <h2>Guild Wars 2 API Retrieval</h2>
+    <h2>Returns the first daily achievement info</h2>
+    <button type="button" id="retrieveID">Retrieve Achievement ID</button><br>
+    <button type="button" id="retrieveName">Retrieve Achievement Name</button><br>
+    <button type="button" id="retrieveRequirement">Retrieve Achievement Requirement</button><br>
+    <h2>First Achievement ID: <span id="firstID"></span></h2>
+    <h2>Name: <span id="firstName"></span></h2>
+    <h2>Requirement: <span id="firstRequirement"></span></h2>
+</body>
+</html>
